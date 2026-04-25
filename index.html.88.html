@@ -1,0 +1,931 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);}
+.app{display:flex;height:720px;background:var(--color-background-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;border:0.5px solid var(--color-border-tertiary);}
+.sidebar{width:190px;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;flex-shrink:0;}
+.sb-hd{padding:11px 13px 9px;border-bottom:0.5px solid var(--color-border-tertiary);}
+.sb-logo{font-size:13px;font-weight:500;color:var(--color-text-primary);}
+.sb-sub{font-size:10px;color:var(--color-text-secondary);margin-top:2px;}
+.sb-sec{font-size:10px;font-weight:500;color:var(--color-text-secondary);padding:8px 12px 3px;letter-spacing:.04em;}
+.ni{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;font-size:12px;color:var(--color-text-secondary);transition:background .12s;}
+.ni:hover{background:var(--color-background-secondary);}
+.ni.active{background:#E6F1FB;color:#185FA5;font-weight:500;}
+.ni-icon{font-size:13px;width:16px;text-align:center;}
+.nb{margin-left:auto;font-size:9px;border-radius:20px;padding:1px 6px;font-weight:500;}
+.nb-new{background:#EAF3DE;color:#3B6D11;}
+.nb-hot{background:#FCEBEB;color:#A32D2D;}
+.sb-div{height:0.5px;background:var(--color-border-tertiary);margin:5px 0;}
+.sb-foot{padding:8px 12px;border-top:0.5px solid var(--color-border-tertiary);margin-top:auto;}
+.sf-row{display:flex;justify-content:space-between;padding:2px 0;}
+.sf-lbl{font-size:10px;color:var(--color-text-secondary);}
+.sf-val{font-size:11px;font-weight:500;}
+.sf-val.g{color:#3B6D11;}.sf-val.r{color:#A32D2D;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:9px 13px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.tb-title{font-size:13px;font-weight:500;color:var(--color-text-primary);}
+.tb-sub{font-size:10px;color:var(--color-text-secondary);margin-top:1px;}
+.tb-r{display:flex;align-items:center;gap:8px;}
+.ai-pill{display:flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:20px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);}
+.ai-d{width:6px;height:6px;border-radius:50%;background:#3B6D11;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.content{flex:1;overflow-y:auto;padding:12px 13px;}
+.view{display:none;}.view.active{display:block;}
+
+/* ========= 運賃判断ページ ========= */
+.unc-layout{display:grid;grid-template-columns:1fr 1fr;gap:10px;height:100%;}
+.unc-left{display:flex;flex-direction:column;gap:9px;}
+.unc-right{display:flex;flex-direction:column;gap:9px;overflow-y:auto;}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:11px 13px;}
+.card-title{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:9px;display:flex;align-items:center;gap:6px;justify-content:space-between;}
+.ct-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:500;}
+
+/* 案件入力フォーム */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:6px 9px;}
+.fg.c3{grid-template-columns:1fr 1fr 1fr;}
+.fr{display:flex;flex-direction:column;gap:2px;}
+.fl{font-size:10px;color:var(--color-text-secondary);}
+.fi,.fs{padding:5px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:11px;background:var(--color-background-primary);color:var(--color-text-primary);width:100%;}
+.fi:focus,.fs:focus{outline:none;border-color:#185FA5;}
+
+/* 相場表 */
+.shoba-table{width:100%;border-collapse:collapse;font-size:10px;}
+.shoba-table th{padding:4px 7px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-weight:500;text-align:left;border-bottom:0.5px solid var(--color-border-tertiary);}
+.shoba-table td{padding:5px 7px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);}
+.shoba-table tr:last-child td{border-bottom:none;}
+.shoba-table tr.highlight{background:#E6F1FB;}
+.shoba-table tr.highlight td{color:#0C447C;}
+.price-range{display:flex;align-items:center;gap:4px;font-size:10px;}
+.pr-bar{flex:1;height:4px;background:var(--color-border-tertiary);border-radius:2px;position:relative;}
+.pr-fill{height:100%;border-radius:2px;background:#185FA5;}
+.pr-dot{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%;background:#A32D2D;border:1.5px solid var(--color-background-primary);}
+
+/* AI判断パネル */
+.judge-panel{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:11px 13px;}
+.jp-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.jp-icon{font-size:18px;}
+.jp-title{font-size:12px;font-weight:500;color:var(--color-text-primary);}
+.jp-sub{font-size:10px;color:var(--color-text-secondary);}
+
+/* 価格提示ゾーン */
+.price-propose{background:#E6F1FB;border:0.5px solid #B5D4F4;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:9px;}
+.pp-label{font-size:10px;color:#185FA5;font-weight:500;margin-bottom:4px;}
+.pp-price{font-size:24px;font-weight:500;color:#0C447C;display:flex;align-items:baseline;gap:4px;}
+.pp-unit{font-size:12px;color:#185FA5;}
+.pp-range{font-size:10px;color:#185FA5;margin-top:3px;}
+.pp-reason{font-size:10px;color:#0C447C;margin-top:5px;line-height:1.6;}
+
+/* 条件カード */
+.cond-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px;}
+.cond-item{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:7px 9px;}
+.ci-label{font-size:9px;color:var(--color-text-secondary);margin-bottom:2px;font-weight:500;}
+.ci-val{font-size:11px;font-weight:500;color:var(--color-text-primary);}
+.ci-val.ok{color:#3B6D11;}.ci-val.warn{color:#854F0B;}.ci-val.ng{color:#A32D2D;}
+.ci-sub{font-size:9px;color:var(--color-text-secondary);margin-top:2px;}
+
+/* すり合わせ提案 */
+.proposal-list{display:flex;flex-direction:column;gap:6px;}
+.proposal{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 10px;cursor:pointer;transition:all .15s;}
+.proposal:hover{border-color:#185FA5;background:#E6F1FB;}
+.proposal.selected{border-color:#185FA5;background:#E6F1FB;}
+.proposal.accepted{border-color:#639922;background:#EAF3DE;}
+.proposal.rejected{border-color:var(--color-border-tertiary);background:var(--color-background-secondary);opacity:.6;}
+.pr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.pr-type{font-size:10px;font-weight:500;color:var(--color-text-primary);}
+.pr-badge{font-size:9px;padding:1px 6px;border-radius:20px;font-weight:500;}
+.prb-rec{background:#E6F1FB;color:#185FA5;}
+.prb-alt{background:#FAEEDA;color:#854F0B;}
+.prb-min{background:#EAF3DE;color:#3B6D11;}
+.pr-detail{font-size:10px;color:var(--color-text-secondary);line-height:1.5;}
+.pr-price{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-top:3px;}
+.pr-actions{display:flex;gap:5px;margin-top:6px;}
+.pa-btn{padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);font-size:10px;cursor:pointer;transition:all .12s;}
+.pa-accept{background:#185FA5;color:#fff;border-color:#185FA5;}
+.pa-accept:hover{background:#0C447C;}
+.pa-alt{background:none;color:var(--color-text-secondary);}
+.pa-alt:hover{background:var(--color-background-secondary);}
+
+/* AI判断ボタン */
+.ai-judge-btn{width:100%;padding:8px;background:#185FA5;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;}
+.ai-judge-btn:hover{background:#0C447C;}
+.ai-judge-btn.loading{background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:default;}
+
+/* 相場フィルター */
+.shoba-filters{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.sf-tag{font-size:10px;padding:3px 9px;border-radius:20px;border:0.5px solid var(--color-border-tertiary);cursor:pointer;transition:all .12s;background:var(--color-background-secondary);}
+.sf-tag:hover{border-color:#185FA5;color:#185FA5;}
+.sf-tag.active{background:#E6F1FB;color:#185FA5;border-color:#185FA5;font-weight:500;}
+
+/* 相場グラフ */
+.shoba-graph{margin-bottom:8px;}
+.sg-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.sg-label{font-size:10px;color:var(--color-text-secondary);width:70px;flex-shrink:0;text-align:right;}
+.sg-bar-wrap{flex:1;height:16px;background:var(--color-background-secondary);border-radius:3px;position:relative;overflow:visible;}
+.sg-bar{height:100%;border-radius:3px;background:#B5D4F4;transition:width .5s;}
+.sg-bar.highlighted{background:#185FA5;}
+.sg-val{font-size:10px;color:var(--color-text-secondary);width:55px;text-align:right;flex-shrink:0;}
+.sg-marker{position:absolute;top:-3px;bottom:-3px;width:2px;background:#A32D2D;border-radius:1px;}
+
+/* チャット交渉 */
+.neg-chat{display:flex;flex-direction:column;height:100%;min-height:300px;}
+.nc-log{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:7px;max-height:200px;}
+.nc-msg{max-width:88%;padding:6px 9px;border-radius:var(--border-radius-md);font-size:11px;line-height:1.5;}
+.nc-msg.ai{background:#E6F1FB;color:#0C447C;align-self:flex-start;border:0.5px solid #B5D4F4;}
+.nc-msg.user{background:var(--color-background-primary);color:var(--color-text-primary);align-self:flex-end;border:0.5px solid var(--color-border-tertiary);}
+.nc-mw{font-size:9px;font-weight:500;margin-bottom:2px;opacity:.7;}
+.nc-msg.ai .nc-mw{color:#185FA5;}.nc-msg.user .nc-mw{color:var(--color-text-secondary);}
+.nc-input-row{display:flex;gap:5px;}
+.nc-input{flex:1;padding:6px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:11px;background:var(--color-background-primary);color:var(--color-text-primary);}
+.nc-input:focus{outline:none;border-color:#185FA5;}
+.nc-send{background:#185FA5;color:#fff;border:none;border-radius:var(--border-radius-md);padding:6px 11px;font-size:11px;cursor:pointer;}
+
+/* 履歴 */
+.hist-list{display:flex;flex-direction:column;gap:6px;}
+.hist-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 10px;}
+.hc-row{display:flex;align-items:center;justify-content:space-between;}
+.hc-id{font-size:11px;font-weight:500;color:var(--color-text-primary);}
+.hc-price{font-size:13px;font-weight:500;color:#185FA5;}
+.hc-meta{font-size:10px;color:var(--color-text-secondary);margin-top:2px;}
+.hc-tags{display:flex;gap:4px;margin-top:4px;}
+
+.lbar{height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;margin-top:4px;}
+.lfill{height:100%;background:#185FA5;border-radius:2px;transition:width .3s;}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#3B6D11;color:#fff;padding:8px 18px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;z-index:999;animation:fu .25s;pointer-events:none;}
+@keyframes fu{from{opacity:0;transform:translateX(-50%) translateY(6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+</style>
+
+
+<style id="modern-ui-overrides">
+:root{
+  --font-sans:"Inter","Noto Sans JP",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f6f8fb;
+  --color-background-tertiary:#eef3f8;
+  --color-text-primary:#0f172a;
+  --color-text-secondary:#64748b;
+  --color-border-tertiary:#dbe4ee;
+  --border-radius-md:14px;
+  --border-radius-lg:24px;
+  --blue-strong:#2563eb;
+  --blue-deep:#1d4ed8;
+  --blue-soft:#eff6ff;
+  --green-soft:#ecfdf3;
+  --green-text:#15803d;
+  --amber-soft:#fff7ed;
+  --amber-text:#b45309;
+  --red-soft:#fef2f2;
+  --red-text:#b91c1c;
+  --shadow-soft:0 10px 30px rgba(15,23,42,.08);
+  --shadow-card:0 8px 24px rgba(15,23,42,.06);
+}
+html,body{height:100%;}
+body{
+  font-family:var(--font-sans);
+  background:linear-gradient(180deg,#f8fbff 0%,#eef4f9 100%);
+  color:var(--color-text-primary);
+  padding:24px;
+}
+.app{
+  height:min(94vh,920px);
+  min-height:780px;
+  border-radius:30px;
+  border:1px solid var(--color-border-tertiary);
+  box-shadow:0 24px 60px rgba(15,23,42,.10);
+  background:rgba(255,255,255,.74);
+  backdrop-filter:blur(10px);
+}
+.sidebar{
+  width:248px;
+  padding:10px;
+  background:linear-gradient(180deg,#ffffff 0%,#f9fbfd 100%);
+  border-right:1px solid var(--color-border-tertiary);
+}
+.sb-hd{
+  padding:16px 14px 14px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);
+  color:#fff;
+  margin-bottom:12px;
+}
+.sb-logo{font-size:15px;font-weight:700;color:#fff;letter-spacing:.01em;}
+.sb-sub{font-size:11px;color:rgba(255,255,255,.74);margin-top:4px;}
+.sb-sec{font-size:11px;font-weight:700;color:#94a3b8;padding:10px 10px 6px;letter-spacing:.08em;text-transform:uppercase;}
+.ni{border-radius:14px;padding:11px 12px;margin-bottom:4px;font-size:13px;font-weight:500;color:#334155;}
+.ni:hover{background:#f3f8ff;color:#0f172a;}
+.ni.active{background:linear-gradient(135deg,#eff6ff 0%,#e0ecff 100%);color:#1d4ed8;font-weight:700;box-shadow:inset 0 0 0 1px #bfdbfe;}
+.ni-icon{width:18px;font-size:14px;}
+.nb{font-size:10px;padding:2px 7px;border-radius:999px;}
+.nb-new{background:var(--green-soft);color:var(--green-text);}
+.nb-hot{background:var(--red-soft);color:var(--red-text);}
+.sb-div{margin:10px 4px;height:1px;background:var(--color-border-tertiary);}
+.sb-foot{margin-top:auto;padding:12px;border:1px solid var(--color-border-tertiary);border-radius:18px;background:var(--color-background-secondary);}
+.sf-row{padding:4px 0;}
+.sf-lbl{font-size:11px;}
+.sf-val{font-size:12px;font-weight:700;}
+.main{background:transparent;}
+.topbar{padding:20px 22px 14px;background:rgba(255,255,255,.66);backdrop-filter:blur(12px);border-bottom:none;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
+.tb-title{font-size:22px;font-weight:800;letter-spacing:-.02em;color:#0f172a;}
+.tb-sub{font-size:13px;color:#64748b;margin-top:6px;line-height:1.5;}
+.tb-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.ai-pill{padding:7px 12px;font-size:11px;font-weight:600;border-radius:999px;background:#f8fafc;border:1px solid var(--color-border-tertiary);color:#475569;}
+.ai-d{width:7px;height:7px;background:#16a34a;box-shadow:0 0 0 4px rgba(22,163,74,.12);}
+.quick-date{font-size:11px;color:#64748b;font-weight:600;}
+.mini-action{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#fff;border:none;border-radius:12px;padding:9px 14px;font-size:12px;font-weight:700;box-shadow:0 8px 18px rgba(37,99,235,.22);cursor:pointer;}
+.overview-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:0 22px 6px;}
+.ov-card{background:rgba(255,255,255,.84);border:1px solid var(--color-border-tertiary);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow-card);}
+.ov-k{font-size:11px;font-weight:700;color:#64748b;letter-spacing:.05em;text-transform:uppercase;}
+.ov-v{font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-.03em;margin-top:6px;}
+.ov-s{font-size:11px;color:#64748b;margin-top:4px;line-height:1.5;}
+.content{padding:14px 22px 22px;}
+.view{animation:fadeIn .18s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.unc-layout{grid-template-columns:minmax(360px,.92fr) minmax(420px,1.18fr);gap:16px;align-items:start;}
+.unc-left,.unc-right{gap:14px;}
+.card,.judge-panel,.hist-card{
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--color-border-tertiary);
+  border-radius:22px;
+  padding:16px 18px;
+  box-shadow:var(--shadow-card);
+}
+.card-title,.jp-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:12px;}
+.card-title{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ct-badge,.pr-badge,.badge{font-size:10px;padding:3px 8px;border-radius:999px;font-weight:700;}
+.fg{gap:10px 12px;}
+.fg.c3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.fl{font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;}
+.fi,.fs,.nc-input{
+  padding:11px 12px;
+  border:1px solid var(--color-border-tertiary);
+  border-radius:14px;
+  font-size:12px;
+  background:#fff;
+  color:#0f172a;
+  width:100%;
+}
+.fi:focus,.fs:focus,.nc-input:focus{outline:none;border-color:#93c5fd;box-shadow:0 0 0 4px rgba(37,99,235,.12);}
+.ai-judge-btn,.nc-send,.pa-btn,.mini-ghost{
+  min-height:40px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:700;
+}
+.ai-judge-btn{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);box-shadow:0 10px 20px rgba(37,99,235,.22);}
+.ai-judge-btn:hover{background:linear-gradient(135deg,#1d4ed8 0%,#1e40af 100%);}
+.ai-judge-btn.loading{background:#e2e8f0;color:#475569;box-shadow:none;}
+.helper-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.helper-chip{font-size:10px;font-weight:700;padding:6px 10px;border-radius:999px;background:#f8fafc;border:1px solid var(--color-border-tertiary);color:#64748b;}
+.helper-chip.positive{background:var(--green-soft);color:var(--green-text);border-color:#bbf7d0;}
+.helper-chip.warn{background:var(--amber-soft);color:var(--amber-text);border-color:#fed7aa;}
+.shoba-graph{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+.sg-row{margin-bottom:0;}
+.sg-label{width:86px;font-size:11px;font-weight:600;color:#64748b;}
+.sg-bar-wrap{height:18px;border-radius:999px;background:#edf2f7;overflow:hidden;}
+.sg-bar{border-radius:999px;background:#bfdbfe;}
+.sg-bar.highlighted{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);}
+.sg-val{width:96px;font-size:11px;color:#475569;font-weight:600;}
+.judge-panel{padding:18px 20px;position:sticky;top:8px;}
+.jp-header{gap:10px;margin-bottom:14px;}
+.jp-icon{font-size:22px;}
+.jp-sub{font-size:11px;color:#64748b;line-height:1.5;}
+.price-propose{background:linear-gradient(135deg,#eff6ff 0%,#f8fbff 100%);border:1px solid #bfdbfe;border-radius:20px;padding:18px 18px 16px;margin-bottom:14px;}
+.pp-label{font-size:11px;font-weight:700;color:#2563eb;letter-spacing:.04em;text-transform:uppercase;}
+.pp-price{font-size:52px;font-weight:800;line-height:1;letter-spacing:-.05em;color:#0f172a;margin-top:8px;}
+.pp-unit{font-size:14px;color:#2563eb;font-weight:700;}
+.pp-range{font-size:12px;color:#2563eb;margin-top:10px;font-weight:600;}
+.pp-reason{font-size:12px;color:#1e3a8a;margin-top:10px;line-height:1.8;}
+.cond-grid{gap:10px;margin-bottom:0;}
+.cond-item{background:#f8fafc;border:1px solid #e5edf5;border-radius:16px;padding:12px 12px;}
+.ci-label{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:4px;}
+.ci-val{font-size:14px;font-weight:800;color:#0f172a;}
+.ci-val.ok{color:var(--green-text);}.ci-val.warn{color:var(--amber-text);}.ci-val.ng{color:var(--red-text);}
+.ci-sub{font-size:11px;color:#64748b;margin-top:4px;line-height:1.5;}
+.proposal-list{gap:10px;}
+.proposal{border:1px solid var(--color-border-tertiary);border-radius:18px;padding:12px 14px;background:#fff;box-shadow:var(--shadow-card);}
+.proposal:hover,.proposal.selected{border-color:#93c5fd;background:#f8fbff;transform:translateY(-1px);}
+.proposal.accepted{border-color:#86efac;background:var(--green-soft);}
+.proposal.rejected{background:#f8fafc;opacity:.72;}
+.pr-type{font-size:12px;font-weight:700;}
+.prb-rec{background:var(--blue-soft);color:var(--blue-strong);}
+.prb-alt{background:var(--amber-soft);color:var(--amber-text);}
+.prb-min{background:var(--green-soft);color:var(--green-text);}
+.pr-detail{font-size:11px;color:#64748b;line-height:1.7;}
+.pr-price{font-size:20px;font-weight:800;color:#0f172a;margin-top:8px;}
+.pr-actions{gap:8px;margin-top:10px;}
+.pa-btn{padding:0 12px;border:1px solid var(--color-border-tertiary);background:#fff;color:#475569;}
+.pa-accept{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#fff;border-color:#2563eb;}
+.pa-alt:hover{background:#f8fafc;}
+.neg-chat{min-height:340px;}
+.nc-log{padding:12px;gap:8px;background:#f8fafc;border-radius:18px;border:1px solid var(--color-border-tertiary);max-height:260px;}
+.nc-msg{max-width:90%;padding:10px 12px;border-radius:16px;font-size:12px;line-height:1.7;}
+.nc-msg.ai{background:#eff6ff;color:#1e3a8a;border:1px solid #bfdbfe;}
+.nc-msg.user{background:#fff;color:#0f172a;border:1px solid var(--color-border-tertiary);}
+.nc-mw{font-size:10px;font-weight:700;}
+.nc-input-row{gap:8px;margin-top:10px;}
+.nc-send{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#fff;border:none;padding:0 16px;}
+.shoba-table{font-size:11px;}
+.shoba-table th{padding:10px 10px;background:#f8fafc;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.shoba-table td{padding:10px 10px;}
+.shoba-table tr.highlight{background:#f8fbff;}
+.price-range{gap:8px;}
+.pr-bar{height:6px;border-radius:999px;background:#e2e8f0;}
+.pr-fill{background:#93c5fd;}
+.pr-dot{top:-2px;width:10px;height:10px;background:#ef4444;}
+.hist-list{gap:10px;}
+.hist-card{padding:14px 16px;}
+.hc-id{font-size:13px;font-weight:700;}
+.hc-price{font-size:22px;font-weight:800;color:#2563eb;}
+.hc-meta{font-size:11px;color:#64748b;line-height:1.7;margin-top:6px;}
+.hc-tags{gap:6px;margin-top:8px;flex-wrap:wrap;}
+.placeholder-view,.empty-state{
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--color-border-tertiary);
+  border-radius:22px;
+  box-shadow:var(--shadow-card);
+}
+.placeholder-view{padding:40px;text-align:center;color:#64748b;font-size:13px;}
+.empty-state{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:28px;min-height:520px;text-align:center;}
+.empty-icon{font-size:54px;opacity:.9;}
+.empty-title{font-size:18px;font-weight:800;color:#0f172a;letter-spacing:-.02em;}
+.empty-sub{font-size:13px;color:#64748b;line-height:1.7;max-width:360px;}
+.empty-steps{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.empty-step{font-size:11px;font-weight:700;padding:7px 11px;border-radius:999px;background:#f8fafc;border:1px solid var(--color-border-tertiary);color:#64748b;}
+.lbar{height:4px;border-radius:999px;background:#e2e8f0;margin-top:8px;overflow:hidden;}
+.lfill{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);}
+.toast{border-radius:999px;box-shadow:0 18px 30px rgba(21,128,61,.25);padding:10px 18px;}
+
+@media (max-width: 1200px){
+  body{padding:14px;}
+  .overview-strip{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .unc-layout{grid-template-columns:1fr;}
+  .judge-panel{position:static;}
+}
+@media (max-width: 860px){
+  .app{height:auto;min-height:unset;flex-direction:column;}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--color-border-tertiary);}
+  .overview-strip,.fg,.fg.c3{grid-template-columns:1fr;}
+  .topbar{flex-direction:column;align-items:flex-start;}
+  .tb-r{justify-content:flex-start;}
+  .pp-price{font-size:40px;}
+}
+</style>
+
+<div class="app">
+  <!-- サイドバー -->
+  <div class="sidebar">
+    <div class="sb-hd">
+      <div class="sb-logo">🚛 配車オペレーション Hub</div>
+      <div class="sb-sub">2025年4月25日</div>
+    </div>
+    <div class="sb-sec">受付チャネル</div>
+    <div class="ni" id="nav-ai" onclick="go('ai')"><span class="ni-icon">🤖</span> AI電話応答</div>
+    <div class="ni" id="nav-tel" onclick="go('tel')"><span class="ni-icon">📞</span> 電話受付</div>
+    <div class="ni" id="nav-fax" onclick="go('fax')"><span class="ni-icon">📠</span> FAX受付 <span class="nb nb-hot">2件</span></div>
+    <div class="ni" id="nav-mail" onclick="go('mail')"><span class="ni-icon">✉️</span> メール受付 <span class="nb nb-new">3件</span></div>
+    <div class="sb-div"></div>
+    <div class="sb-sec">運賃オペレーション</div>
+    <div class="ni active" id="nav-unc" onclick="go('unc')"><span class="ni-icon">💴</span> 運賃判断センター <span class="nb nb-new">NEW</span></div>
+    <div class="ni" id="nav-shoba" onclick="go('shoba')"><span class="ni-icon">📊</span> 相場表</div>
+    <div class="ni" id="nav-hist" onclick="go('hist')"><span class="ni-icon">🗂️</span> 成約履歴</div>
+    <div class="sb-div"></div>
+    <div class="sb-sec">全体管理</div>
+    <div class="ni" id="nav-dash" onclick="go('dash')"><span class="ni-icon">📋</span> ダッシュボード</div>
+    <div class="ni" id="nav-haisha" onclick="go('haisha')"><span class="ni-icon">🗺️</span> 配車・ルート</div>
+    <div class="sb-foot">
+      <div class="sf-row"><span class="sf-lbl">本日成約</span><span class="sf-val g">8件</span></div>
+      <div class="sf-row"><span class="sf-lbl">平均運賃</span><span class="sf-val">¥42,500</span></div>
+      <div class="sf-row"><span class="sf-lbl">交渉中</span><span class="sf-val r">3件</span></div>
+    </div>
+  </div>
+
+  <!-- メイン -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="tb-title" id="tbTitle">💴 運賃判断センター</div>
+        <div class="tb-sub" id="tbSub">相場確認、AI価格提示、交渉アシストをひとつの流れで確認できるモダンUI</div>
+      </div>
+      <div class="tb-r">
+        <div class="ai-pill"><div class="ai-d"></div>AI運賃エンジン稼働中</div>
+        <div class="quick-date">2026/04/25</div>
+        <button class="mini-action" onclick="fillSample()">サンプル案件を入れる</button>
+      </div>
+    </div>
+
+    <div class="overview-strip">
+      <div class="ov-card">
+        <div class="ov-k">本日成約</div>
+        <div class="ov-v" id="ovDeals">8件</div>
+        <div class="ov-s">直近の成約状況を先頭で確認</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-k">平均運賃</div>
+        <div class="ov-v" id="ovAvg">¥42,500</div>
+        <div class="ov-s">最近の成約データから自動集計</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-k">交渉中</div>
+        <div class="ov-v" id="ovNegotiating">3件</div>
+        <div class="ov-s">今フォローが必要な案件数</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-k">推奨精度</div>
+        <div class="ov-v" id="ovCoverage">相場反映中</div>
+        <div class="ov-s">相場表・履歴・条件割増を同時参照</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ===== 運賃判断・交渉 ===== -->
+      <div class="view active" id="view-unc">
+        <div class="unc-layout">
+
+          <!-- 左：案件入力 + 相場表 -->
+          <div class="unc-left">
+
+            <!-- 案件条件入力 -->
+            <div class="card">
+              <div class="card-title">📦 案件条件を入力<button class="mini-ghost" onclick="fillSample()" style="background:#fff;border:1px solid var(--color-border-tertiary);padding:0 12px;color:var(--color-text-secondary);cursor:pointer;">サンプル挿入</button></div><div class="helper-row"><span class="helper-chip positive">相場照合あり</span><span class="helper-chip">AI価格提示</span><span class="helper-chip warn">条件割増を自動反映</span></div>
+              <div class="fg" style="margin-bottom:7px">
+                <div class="fr"><label class="fl">出発地（都道府県）</label><select class="fs" id="u-from"><option>東京都</option><option>神奈川県</option><option>埼玉県</option><option>千葉県</option><option>大阪府</option><option>愛知県</option></select></div>
+                <div class="fr"><label class="fl">配送先（都道府県）</label><select class="fs" id="u-to"><option>神奈川県</option><option>東京都</option><option>埼玉県</option><option>千葉県</option><option>大阪府</option><option>愛知県</option></select></div>
+              </div>
+              <div class="fg c3" style="margin-bottom:7px">
+                <div class="fr"><label class="fl">重量（kg）</label><input class="fi" id="u-weight" type="number" value="200" min="1"/></div>
+                <div class="fr"><label class="fl">車両種別</label><select class="fs" id="u-vtype"><option>軽バン</option><option>2tトラック</option><option>4tトラック</option><option>10tトラック</option></select></div>
+                <div class="fr"><label class="fl">荷物種別</label><select class="fs" id="u-gtype"><option>一般貨物</option><option>精密機器</option><option>冷蔵・冷凍</option><option>危険物</option><option>大型家具</option></select></div>
+              </div>
+              <div class="fg" style="margin-bottom:7px">
+                <div class="fr"><label class="fl">集荷希望日時</label><input class="fi" id="u-date" value="来週月曜 午前中"/></div>
+                <div class="fr"><label class="fl">特記事項</label><input class="fi" id="u-note" placeholder="時間指定・待機あり等"/></div>
+              </div>
+              <div class="fg">
+                <div class="fr"><label class="fl">荷主の提示価格（円・任意）</label><input class="fi" id="u-offered" type="number" placeholder="相手の希望額"/></div>
+                <div class="fr"><label class="fl">緊急度</label><select class="fs" id="u-urgency"><option>通常</option><option>急ぎ（翌日以内）</option><option>本日中</option></select></div>
+              </div>
+              <button class="ai-judge-btn" id="judgeBtn" style="margin-top:9px" onclick="runJudge()">✨ AIで運賃・条件を判断する</button>
+              <div class="lbar" id="judgeLbar" style="display:none"><div class="lfill" id="judgeFill" style="width:0%"></div></div>
+            </div>
+
+            <!-- ミニ相場グラフ -->
+            <div class="card">
+              <div class="card-title">📊 区間相場の目安<span style="font-size:10px;color:var(--color-text-secondary)">選択した区間・車種の相場レンジ</span></div>
+              <div class="shoba-graph" id="shobaGraph">
+                <div class="sg-row"><span class="sg-label">軽バン</span><div class="sg-bar-wrap"><div class="sg-bar" style="width:38%"></div></div><span class="sg-val">¥15,000〜22,000</span></div>
+                <div class="sg-row"><span class="sg-label">2tトラック</span><div class="sg-bar-wrap"><div class="sg-bar highlighted" style="width:55%"></div></div><span class="sg-val">¥28,000〜42,000</span></div>
+                <div class="sg-row"><span class="sg-label">4tトラック</span><div class="sg-bar-wrap"><div class="sg-bar" style="width:72%"></div></div><span class="sg-val">¥45,000〜65,000</span></div>
+                <div class="sg-row"><span class="sg-label">10tトラック</span><div class="sg-bar-wrap"><div class="sg-bar" style="width:90%"></div></div><span class="sg-val">¥75,000〜120,000</span></div>
+              </div>
+              <div style="font-size:9px;color:var(--color-text-secondary);display:flex;gap:12px">
+                <span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:3px;background:#185FA5;display:inline-block;border-radius:1px"></span>選択中の車種</span>
+                <span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:3px;background:#B5D4F4;display:inline-block;border-radius:1px"></span>他車種</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 右：AI判断結果 -->
+          <div class="unc-right" id="judgeResult" style="display:none">
+
+            <!-- 価格提示 -->
+            <div class="judge-panel" id="pricePanel">
+              <div class="jp-header">
+                <span class="jp-icon">💴</span>
+                <div><div class="jp-title">AI運賃提示</div><div class="jp-sub">相場・条件・需給を加味した判断</div></div>
+              </div>
+              <div class="price-propose">
+                <div class="pp-label">推奨提示価格</div>
+                <div class="pp-price"><span id="pp-price">¥38,000</span><span class="pp-unit">（税込）</span></div>
+                <div class="pp-range" id="pp-range">相場レンジ: ¥28,000〜¥42,000</div>
+                <div class="pp-reason" id="pp-reason"></div>
+              </div>
+              <div class="cond-grid" id="condGrid">
+                <div class="cond-item"><div class="ci-label">相場比較</div><div class="ci-val ok" id="ci-market">相場内（+5%）</div><div class="ci-sub">適正価格帯</div></div>
+                <div class="cond-item"><div class="ci-label">荷主提示額</div><div class="ci-val warn" id="ci-offered">¥32,000（低め）</div><div class="ci-sub">相場比▲15%</div></div>
+                <div class="cond-item"><div class="ci-label">車両稼働状況</div><div class="ci-val ok" id="ci-vehicle">空車あり</div><div class="ci-sub">軽バン2台</div></div>
+                <div class="cond-item"><div class="ci-label">緊急割増</div><div class="ci-val" id="ci-urgent">なし</div><div class="ci-sub" id="ci-urgent-sub">通常日程</div></div>
+              </div>
+            </div>
+
+            <!-- 条件すり合わせ提案 -->
+            <div class="card">
+              <div class="card-title">🤝 交渉の進め方
+                <span class="ct-badge" style="background:#EEEDFE;color:#3C3489">AI生成</span>
+              </div>
+              <div class="proposal-list" id="proposalList"></div>
+            </div>
+
+            <!-- AI交渉チャット -->
+            <div class="card">
+              <div class="card-title">💬 AI交渉アシスト</div>
+              <div class="neg-chat">
+                <div class="nc-log" id="ncLog">
+                  <div class="nc-msg ai"><div class="nc-mw">🤖 AI</div>運賃・条件の交渉をサポートします。荷主への返答文を作成したり、代替案を提案することができます。何でも質問してください。</div>
+                </div>
+                <div class="nc-input-row">
+                  <input class="nc-input" id="ncInput" placeholder="例：荷主が35,000円を主張しています。どう返せばいい？" onkeydown="if(event.key==='Enter')sendChat()"/>
+                  <button class="nc-send" onclick="sendChat()">送信</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 右：初期状態 -->
+          <div id="judgeEmpty" class="empty-state">
+            <div class="empty-icon">💴</div>
+            <div class="empty-title">AI判断結果はここに表示されます</div>
+            <div class="empty-sub">左の案件条件を入力すると、推奨価格、相場比較、交渉しやすい代替案までまとめて確認できます。</div>
+            <div class="empty-steps">
+              <span class="empty-step">1. 条件入力</span>
+              <span class="empty-step">2. AI判断</span>
+              <span class="empty-step">3. 交渉提案</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== 相場表 ===== -->
+      <div class="view" id="view-shoba">
+        <div class="card" style="margin-bottom:9px">
+          <div class="card-title">📊 区間・車種別 運賃相場表
+            <span style="font-size:9px;color:var(--color-text-secondary)">直近3ヶ月 成約データ基準</span>
+          </div>
+          <div class="shoba-filters">
+            <span class="sf-tag active" onclick="filterShoba('all',this)">すべて</span>
+            <span class="sf-tag" onclick="filterShoba('kanto',this)">関東圏内</span>
+            <span class="sf-tag" onclick="filterShoba('inter',this)">都市間</span>
+            <span class="sf-tag" onclick="filterShoba('light',this)">軽バン</span>
+            <span class="sf-tag" onclick="filterShoba('2t',this)">2tトラック</span>
+            <span class="sf-tag" onclick="filterShoba('4t',this)">4tトラック</span>
+          </div>
+          <table class="shoba-table" id="shobaTable">
+            <thead><tr><th>区間</th><th>車種</th><th>荷物種別</th><th>最安値</th><th>相場</th><th>最高値</th><th>成約件数</th><th>レンジ</th></tr></thead>
+            <tbody id="shobaTbody"></tbody>
+          </table>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <div class="card">
+            <div class="card-title">📈 加算条件一覧</div>
+            <div style="display:flex;flex-direction:column;gap:5px" id="addCondList"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📉 値引き条件一覧</div>
+            <div style="display:flex;flex-direction:column;gap:5px" id="discCondList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 成約履歴 ===== -->
+      <div class="view" id="view-hist">
+        <div class="card" style="margin-bottom:9px">
+          <div class="card-title">🗂️ 成約履歴
+            <span style="font-size:9px;color:var(--color-text-secondary)">直近の成約案件</span>
+          </div>
+          <div class="hist-list" id="histList"></div>
+        </div>
+      </div>
+
+      <!-- ダッシュボード・配車（ダミー） -->
+      <div class="view" id="view-ai"><div class="placeholder-view">🤖 AI電話応答エージェント（統合アプリ参照）</div></div>
+      <div class="view" id="view-tel"><div class="placeholder-view">📞 電話受付（統合アプリ参照）</div></div>
+      <div class="view" id="view-fax"><div class="placeholder-view">📠 FAX受付（統合アプリ参照）</div></div>
+      <div class="view" id="view-mail"><div class="placeholder-view">✉️ メール受付（統合アプリ参照）</div></div>
+      <div class="view" id="view-dash"><div class="placeholder-view">📋 ダッシュボード（統合アプリ参照）</div></div>
+      <div class="view" id="view-haisha"><div class="placeholder-view">🗺️ 配車・ルート（統合アプリ参照）</div></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- ナビ ----
+const pgInfo={
+  unc:{title:'💴 運賃判断センター',sub:'入力条件をもとに推奨価格と交渉案を見やすく提示'},
+  shoba:{title:'📊 運賃相場表',sub:'区間・車種・条件別の相場を一覧で比較'},
+  hist:{title:'🗂️ 成約履歴',sub:'最近の成約価格と交渉結果を時系列で確認'},
+  ai:{title:'🤖 AI電話応答',sub:''},tel:{title:'📞 電話受付',sub:''},fax:{title:'📠 FAX受付',sub:''},mail:{title:'✉️ メール受付',sub:''},dash:{title:'📋 ダッシュボード',sub:''},haisha:{title:'🗺️ 配車・ルート',sub:''},
+};
+function go(p){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-'+p).classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+p).classList.add('active');
+  document.getElementById('tbTitle').textContent=pgInfo[p]?.title||p;
+  document.getElementById('tbSub').textContent=pgInfo[p]?.sub||'';
+  if(p==='shoba') renderShoba();
+  if(p==='hist') renderHist();
+}
+
+function updateOverview(){
+  const deals=histData.filter(h=>h.status==='成約').length;
+  const negotiating=histData.filter(h=>h.status==='交渉中').length;
+  const avg=Math.round(histData.filter(h=>h.status==='成約').reduce((s,h)=>s+h.price,0)/Math.max(deals,1));
+  const ovDeals=document.getElementById('ovDeals'); if(ovDeals) ovDeals.textContent=deals+'件';
+  const ovAvg=document.getElementById('ovAvg'); if(ovAvg) ovAvg.textContent='¥'+avg.toLocaleString();
+  const ovNegotiating=document.getElementById('ovNegotiating'); if(ovNegotiating) ovNegotiating.textContent=negotiating+'件';
+}
+
+// ---- 相場データ ----
+const shobaData=[
+  {from:'東京都',to:'神奈川県',vtype:'軽バン',gtype:'一般貨物',min:15000,avg:18500,max:22000,cnt:42,tag:'kanto light'},
+  {from:'東京都',to:'神奈川県',vtype:'2tトラック',gtype:'一般貨物',min:28000,avg:35000,max:42000,cnt:38,tag:'kanto 2t'},
+  {from:'東京都',to:'神奈川県',vtype:'2tトラック',gtype:'精密機器',min:38000,avg:46000,max:58000,cnt:15,tag:'kanto 2t'},
+  {from:'東京都',to:'神奈川県',vtype:'4tトラック',gtype:'一般貨物',min:45000,avg:54000,max:65000,cnt:22,tag:'kanto 4t'},
+  {from:'東京都',to:'埼玉県',vtype:'軽バン',gtype:'一般貨物',min:12000,avg:16000,max:20000,cnt:31,tag:'kanto light'},
+  {from:'東京都',to:'埼玉県',vtype:'2tトラック',gtype:'一般貨物',min:22000,avg:29000,max:38000,cnt:27,tag:'kanto 2t'},
+  {from:'東京都',to:'千葉県',vtype:'軽バン',gtype:'一般貨物',min:14000,avg:17500,max:21000,cnt:28,tag:'kanto light'},
+  {from:'東京都',to:'千葉県',vtype:'2tトラック',gtype:'冷蔵・冷凍',min:42000,avg:52000,max:65000,cnt:12,tag:'kanto 2t'},
+  {from:'神奈川県',to:'東京都',vtype:'2tトラック',gtype:'一般貨物',min:26000,avg:33000,max:40000,cnt:33,tag:'kanto 2t'},
+  {from:'東京都',to:'大阪府',vtype:'4tトラック',gtype:'一般貨物',min:85000,avg:110000,max:135000,cnt:18,tag:'inter 4t'},
+  {from:'東京都',to:'愛知県',vtype:'2tトラック',gtype:'一般貨物',min:55000,avg:70000,max:88000,cnt:14,tag:'inter 2t'},
+  {from:'神奈川県',to:'大阪府',vtype:'4tトラック',gtype:'精密機器',min:95000,avg:125000,max:155000,cnt:8,tag:'inter 4t'},
+];
+const addConds=[
+  {label:'精密機器・割れ物',val:'+15〜30%',note:'取扱注意が必要な荷物'},
+  {label:'冷蔵・冷凍',val:'+20〜40%',note:'冷凍車使用・温度管理'},
+  {label:'時間指定（1時間以内）',val:'+10〜20%',note:'到着時刻の厳守'},
+  {label:'当日・緊急依頼',val:'+20〜50%',note:'緊急対応・通常日程外'},
+  {label:'待機料（1時間あたり）',val:'+3,000〜5,000円',note:'荷下ろし待ち等'},
+  {label:'休日・深夜',val:'+25〜50%',note:'土日祝・22時以降'},
+  {label:'搬入・搬出作業',val:'+5,000〜15,000円',note:'ドライバー作業が必要な場合'},
+];
+const discConds=[
+  {label:'定期契約（月10件以上）',val:'▲10〜20%',note:'継続取引による割引'},
+  {label:'長距離（200km以上）',val:'▲5〜10%',note:'走行効率が上がるため'},
+  {label:'積み合わせ可',val:'▲15〜25%',note:'他の荷物と相乗り'},
+  {label:'時間指定なし',val:'▲5〜10%',note:'配達時間の自由度'},
+  {label:'帰り便活用',val:'▲20〜35%',note:'空車回送を有効活用'},
+  {label:'複数口同時依頼',val:'▲5〜15%',note:'まとめ依頼による効率化'},
+];
+
+let shobaFilter='all';
+function filterShoba(f,el){
+  shobaFilter=f;
+  document.querySelectorAll('.sf-tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderShoba();
+}
+function renderShoba(){
+  const tbody=document.getElementById('shobaTbody');tbody.innerHTML='';
+  const filtered=shobaFilter==='all'?shobaData:shobaData.filter(r=>r.tag.includes(shobaFilter));
+  filtered.forEach(r=>{
+    const pct=Math.round((r.avg-r.min)/(r.max-r.min)*100);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.from}→${r.to}</td><td>${r.vtype}</td><td>${r.gtype}</td>
+      <td>¥${r.min.toLocaleString()}</td>
+      <td style="font-weight:500;color:var(--color-text-primary)">¥${r.avg.toLocaleString()}</td>
+      <td>¥${r.max.toLocaleString()}</td>
+      <td style="color:var(--color-text-secondary)">${r.cnt}件</td>
+      <td style="min-width:80px"><div class="price-range"><div class="pr-bar"><div class="pr-fill" style="width:${pct}%"></div><div class="pr-dot" style="left:${pct-5}%"></div></div></div></td>`;
+    tbody.appendChild(tr);
+  });
+  const addEl=document.getElementById('addCondList');addEl.innerHTML='';
+  addConds.forEach(c=>addEl.innerHTML+=`<div style="display:flex;justify-content:space-between;align-items:start;padding:5px 7px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)"><div><div style="font-size:11px;color:var(--color-text-primary)">${c.label}</div><div style="font-size:9px;color:var(--color-text-secondary)">${c.note}</div></div><span style="font-size:11px;font-weight:500;color:#A32D2D;flex-shrink:0;margin-left:8px">${c.val}</span></div>`);
+  const discEl=document.getElementById('discCondList');discEl.innerHTML='';
+  discConds.forEach(c=>discEl.innerHTML+=`<div style="display:flex;justify-content:space-between;align-items:start;padding:5px 7px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)"><div><div style="font-size:11px;color:var(--color-text-primary)">${c.label}</div><div style="font-size:9px;color:var(--color-text-secondary)">${c.note}</div></div><span style="font-size:11px;font-weight:500;color:#3B6D11;flex-shrink:0;margin-left:8px">${c.val}</span></div>`);
+}
+
+// ---- 成約履歴 ----
+const histData=[
+  {id:'#H088',from:'東京都',to:'神奈川県',vtype:'2tトラック',gtype:'精密機器',price:48000,offered:40000,status:'成約',date:'04/25',note:'精密機器割増+20%'},
+  {id:'#H087',from:'東京都',to:'埼玉県',vtype:'軽バン',gtype:'一般貨物',price:16500,offered:16500,status:'成約',date:'04/25',note:'定価成約'},
+  {id:'#H086',from:'神奈川県',to:'東京都',vtype:'2tトラック',gtype:'一般貨物',price:33000,offered:28000,status:'成約',date:'04/24',note:'条件変更（時間指定なし）で合意'},
+  {id:'#H085',from:'東京都',to:'千葉県',vtype:'2tトラック',gtype:'冷蔵・冷凍',price:52000,offered:45000,status:'交渉中',date:'04/24',note:'冷凍車割増で交渉中'},
+  {id:'#H084',from:'東京都',to:'大阪府',vtype:'4tトラック',gtype:'一般貨物',price:110000,offered:110000,status:'成約',date:'04/23',note:'長距離定価'},
+  {id:'#H083',from:'東京都',to:'神奈川県',vtype:'軽バン',gtype:'一般貨物',price:18000,offered:15000,status:'成約',date:'04/23',note:'帰り便活用で値引き'},
+];
+function renderHist(){
+  const el=document.getElementById('histList');el.innerHTML='';
+  histData.forEach(h=>{
+    const diff=h.price-h.offered;const pct=h.offered?Math.round((diff/h.offered)*100):0;
+    el.innerHTML+=`<div class="hist-card">
+      <div class="hc-row"><span class="hc-id">${h.id} ${h.from}→${h.to}</span><span class="hc-price">¥${h.price.toLocaleString()}</span></div>
+      <div class="hc-meta">${h.date} ・ ${h.vtype} ・ ${h.gtype} ・ 荷主提示: ¥${h.offered.toLocaleString()}（${diff>=0?'+':''} ${diff>=0?'+':''} ${pct}%）</div>
+      <div class="hc-tags">
+        <span class="badge" style="background:${h.status==='成約'?'#EAF3DE':'#FAEEDA'};color:${h.status==='成約'?'#3B6D11':'#854F0B'}">${h.status}</span>
+        <span class="badge" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">${h.note}</span>
+      </div>
+    </div>`;
+  });
+  updateOverview();
+}
+
+// ---- サンプル挿入 ----
+function fillSample(){
+  document.getElementById('u-from').value='東京都';
+  document.getElementById('u-to').value='神奈川県';
+  document.getElementById('u-weight').value='200';
+  document.getElementById('u-vtype').value='2tトラック';
+  document.getElementById('u-gtype').value='精密機器';
+  document.getElementById('u-date').value='来週月曜 午前中';
+  document.getElementById('u-note').value='時間指定あり（10時〜12時）';
+  document.getElementById('u-offered').value='40000';
+  document.getElementById('u-urgency').value='通常';
+}
+
+// ---- AI運賃判断 ----
+async function runJudge(){
+  const btn=document.getElementById('judgeBtn');
+  btn.className='ai-judge-btn loading';btn.textContent='✨ AI判断中...';
+  document.getElementById('judgeLbar').style.display='block';
+  const fill=document.getElementById('judgeFill');
+  let p=0;const pi=setInterval(()=>{p=Math.min(p+8,90);fill.style.width=p+'%';},200);
+
+  const from=document.getElementById('u-from').value;
+  const to=document.getElementById('u-to').value;
+  const weight=document.getElementById('u-weight').value;
+  const vtype=document.getElementById('u-vtype').value;
+  const gtype=document.getElementById('u-gtype').value;
+  const date=document.getElementById('u-date').value;
+  const note=document.getElementById('u-note').value;
+  const offered=document.getElementById('u-offered').value;
+  const urgency=document.getElementById('u-urgency').value;
+
+  // 相場データから該当区間を探す
+  const matched=shobaData.find(r=>r.from===from&&r.to===to&&r.vtype===vtype)||shobaData.find(r=>r.from===from&&r.to===to)||shobaData[0];
+
+  let result=null;
+  try{
+    const prompt=`あなたは運送会社の運賃判断AIです。以下の案件条件と相場データを元に、JSON形式のみで運賃提示・条件判断・すり合わせ提案を返してください（前後の説明・\`\`\`不要）。
+
+案件条件:
+- 出発地: ${from}
+- 配送先: ${to}
+- 重量: ${weight}kg
+- 車種: ${vtype}
+- 荷物種別: ${gtype}
+- 日程: ${date}
+- 特記事項: ${note}
+- 荷主提示価格: ${offered?'¥'+Number(offered).toLocaleString()+'円':'未提示'}
+- 緊急度: ${urgency}
+
+相場データ（${from}→${to}・${vtype}）:
+- 最安値: ¥${matched.min.toLocaleString()}
+- 相場平均: ¥${matched.avg.toLocaleString()}
+- 最高値: ¥${matched.max.toLocaleString()}
+
+返すJSONのキー:
+{
+  "recommend_price": 数値（円・税込の推奨提示価格）,
+  "price_min": 数値（最低受注可能価格）,
+  "price_max": 数値（上限提示価格）,
+  "market_comment": "相場比較の一言コメント（20字以内）",
+  "price_reason": "価格根拠の説明（80字以内）",
+  "offered_comment": "荷主提示額への評価（30字以内、提示なしなら空文字）",
+  "offered_class": "ok|warn|ng",
+  "urgent_add": "緊急割増の説明（なしなら'なし'）",
+  "proposals": [
+    {"type": "提案タイトル", "badge": "推奨|代替|最低", "detail": "条件の詳細（50字以内）", "price": 数値},
+    {"type": "提案タイトル", "badge": "推奨|代替|最低", "detail": "条件の詳細（50字以内）", "price": 数値},
+    {"type": "提案タイトル", "badge": "推奨|代替|最低", "detail": "条件の詳細（50字以内）", "price": 数値}
+  ]
+}`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const txt=data.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    result=JSON.parse(txt);
+  }catch(e){
+    // フォールバック
+    const base=matched.avg;
+    const addPct=gtype==='精密機器'?1.25:gtype==='冷蔵・冷凍'?1.35:1;
+    const urgAdd=urgency==='本日中'?1.4:urgency==='急ぎ（翌日以内）'?1.25:1;
+    const rec=Math.round(base*addPct*urgAdd/1000)*1000;
+    const offeredNum=offered?Number(offered):null;
+    result={
+      recommend_price:rec,price_min:Math.round(matched.min*addPct/1000)*1000,price_max:Math.round(matched.max*addPct*urgAdd/1000)*1000,
+      market_comment:`相場内（+${Math.round((rec/matched.avg-1)*100)}%）`,
+      price_reason:`${from}→${to}の${vtype}相場平均¥${matched.avg.toLocaleString()}に${gtype==='精密機器'?'精密機器割増+25%':''}${urgency!=='通常'?'緊急割増':''}を加算した価格。`,
+      offered_comment:offeredNum?(offeredNum<matched.min?'相場を大きく下回る':offeredNum<matched.avg?'相場より低め':'適正範囲'):'',
+      offered_class:offeredNum?(offeredNum<matched.min?'ng':offeredNum<matched.avg*0.9?'warn':'ok'):'ok',
+      urgent_add:urgency==='本日中'?'本日中対応割増+40%':urgency==='急ぎ（翌日以内）'?'急ぎ対応割増+25%':'なし',
+      proposals:[
+        {type:'推奨プラン',badge:'推奨',detail:`${vtype}・${gtype}・時間指定あり（10〜12時）で通常条件の成約`,price:rec},
+        {type:'条件変更案①',badge:'代替',detail:'時間指定なし（午前中）にすることで5%値引き可能',price:Math.round(rec*0.95/1000)*1000},
+        {type:'最低受注ライン',badge:'最低',detail:'これ以下では受注不可。帰り便活用で実現可能な価格',price:Math.round(matched.min*addPct/1000)*1000},
+      ]
+    };
+  }
+
+  clearInterval(pi);fill.style.width='100%';
+  setTimeout(()=>{document.getElementById('judgeLbar').style.display='none';},400);
+
+  // 結果表示
+  document.getElementById('pp-price').textContent='¥'+result.recommend_price.toLocaleString();
+  document.getElementById('pp-range').textContent=`相場レンジ: ¥${result.price_min.toLocaleString()}〜¥${result.price_max.toLocaleString()}`;
+  document.getElementById('pp-reason').textContent=result.price_reason;
+  document.getElementById('ci-market').textContent=result.market_comment;
+  document.getElementById('ci-market').className='ci-val ok';
+  const offEl=document.getElementById('ci-offered');
+  if(offered){
+    offEl.textContent='¥'+Number(offered).toLocaleString()+'（'+result.offered_comment+'）';
+    offEl.className='ci-val '+result.offered_class;
+  }else{
+    offEl.textContent='未提示';offEl.className='ci-val';
+  }
+  document.getElementById('ci-urgent').textContent=result.urgent_add;
+  document.getElementById('ci-urgent').className='ci-val '+(result.urgent_add==='なし'?'':'warn');
+  document.getElementById('ci-urgent-sub').textContent=urgency;
+
+  // 提案リスト
+  const pl=document.getElementById('proposalList');pl.innerHTML='';
+  const badgeCls={推奨:'prb-rec',代替:'prb-alt',最低:'prb-min'};
+  result.proposals.forEach((p,i)=>{
+    const div=document.createElement('div');div.className='proposal';div.id='prop-'+i;
+    div.innerHTML=`<div class="pr-header"><span class="pr-type">${p.type}</span><span class="pr-badge ${badgeCls[p.badge]||'prb-alt'}">${p.badge}</span></div>
+      <div class="pr-detail">${p.detail}</div>
+      <div class="pr-price">¥${p.price.toLocaleString()}</div>
+      <div class="pr-actions">
+        <button class="pa-btn pa-accept" onclick="acceptProp(${i},'${p.type}',${p.price})">この条件で交渉</button>
+        <button class="pa-btn pa-alt" onclick="rejectProp(${i})">却下</button>
+      </div>`;
+    pl.appendChild(div);
+  });
+
+  document.getElementById('judgeResult').style.display='flex';
+  document.getElementById('judgeResult').style.flexDirection='column';
+  document.getElementById('judgeResult').style.gap='9px';
+  document.getElementById('judgeEmpty').style.display='none';
+
+  btn.className='ai-judge-btn';btn.innerHTML='✨ AIで運賃・条件を判断する';
+
+  // チャットに初期メッセージ
+  addChatMsg('ai',`案件分析完了。推奨価格は¥${result.recommend_price.toLocaleString()}です。${offered?'荷主提示¥'+Number(offered).toLocaleString()+'との差額¥'+(result.recommend_price-Number(offered)).toLocaleString()+'について交渉戦略をお伝えできます。':''}何か聞いてください。`);
+}
+
+function acceptProp(i,type,price){
+  document.querySelectorAll('.proposal').forEach(p=>p.classList.remove('selected'));
+  document.getElementById('prop-'+i).classList.add('accepted');
+  toast(`✅「${type}」¥${price.toLocaleString()}で交渉を進めます`);
+  addChatMsg('ai',`「${type}」¥${price.toLocaleString()}での交渉を選択しました。荷主への返答例：「ご提示いただいた金額について検討いたしました。${type}の条件にて¥${price.toLocaleString()}（税込）でご対応可能です。ご検討いただけますでしょうか。」`);
+}
+function rejectProp(i){
+  document.getElementById('prop-'+i).classList.add('rejected');
+}
+
+// ---- 交渉チャット ----
+async function sendChat(){
+  const input=document.getElementById('ncInput');
+  const text=input.value.trim();if(!text)return;
+  addChatMsg('user',text);input.value='';
+
+  const from=document.getElementById('u-from').value,to=document.getElementById('u-to').value;
+  const vtype=document.getElementById('u-vtype').value,gtype=document.getElementById('u-gtype').value;
+  const pprice=document.getElementById('pp-price').textContent;
+  const offered=document.getElementById('u-offered').value;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:`あなたは運送会社の運賃交渉AIアシスタントです。
+現在の案件：${from}→${to}・${vtype}・${gtype}
+AI推奨価格：${pprice}
+荷主提示額：${offered?'¥'+Number(offered).toLocaleString():'未提示'}
+
+配車担当者からの質問：「${text}」
+
+実践的で具体的な交渉アドバイスを100字以内で日本語で返してください。荷主への返答文が必要なら提示してください。`}]})});
+    const data=await res.json();
+    const reply=data.content.map(i=>i.text||'').join('').trim();
+    addChatMsg('ai',reply);
+  }catch(e){
+    addChatMsg('ai','アドバイス：相場データを根拠に「業界標準価格での提示です」と伝え、条件変更（時間指定なし等）による値引きを提案してみてください。');
+  }
+}
+
+function addChatMsg(who,text){
+  const log=document.getElementById('ncLog');
+  const d=document.createElement('div');
+  d.className='nc-msg '+(who==='ai'?'ai':'user');
+  d.innerHTML=`<div class="nc-mw">${who==='ai'?'🤖 AI':'👤 担当者'}</div>${text}`;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;
+}
+
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2800);}
+
+// 初期相場グラフ更新
+document.getElementById('u-vtype').addEventListener('change',updateGraph);
+function updateGraph(){
+  const vtype=document.getElementById('u-vtype').value;
+  const from=document.getElementById('u-from').value,to=document.getElementById('u-to').value;
+  const rows=[
+    {label:'軽バン',v:'軽バン',min:15000,max:22000},
+    {label:'2tトラック',v:'2tトラック',min:28000,max:42000},
+    {label:'4tトラック',v:'4tトラック',min:45000,max:65000},
+    {label:'10tトラック',v:'10tトラック',min:75000,max:120000},
+  ];
+  const maxVal=120000;
+  const g=document.getElementById('shobaGraph');g.innerHTML='';
+  rows.forEach(r=>{
+    const w=Math.round((r.max/maxVal)*90);
+    g.innerHTML+=`<div class="sg-row"><span class="sg-label">${r.label}</span><div class="sg-bar-wrap"><div class="sg-bar ${r.v===vtype?'highlighted':''}" style="width:${w}%"></div></div><span class="sg-val">¥${r.min.toLocaleString()}〜${r.max.toLocaleString()}</span></div>`;
+  });
+}
+
+renderShoba();
+renderHist();
+updateGraph();
+updateOverview();
+</script>
